@@ -1,7 +1,8 @@
 
-#ifndef MICRO_ROS_PLATFORMIO
-#define MICRO_ROS_PLATFORMIO
+#ifndef MICRO_ROS_CUSTOM_TRANSPORT
+#define MICRO_ROS_CUSTOM_TRANSPORT
 
+#include <Ethernet.h>
 #include <uxr/client/transport.h>
 
 // In GNU C < 6.0.0 __attribute__((deprecated(msg))) is not supported for enums, used in rmw/types.h
@@ -31,6 +32,31 @@ size_t platformio_transport_read(struct uxrCustomTransport* transport, uint8_t* 
 }
 #endif
 
-#include "custom_transport.h"
+
+struct micro_ros_agent_locator {
+	IPAddress address;
+	int port;
+};
+
+static inline void set_microros_eth_transports(byte mac[], IPAddress client_ip, IPAddress agent_ip, uint16_t agent_port){
+
+	static struct micro_ros_agent_locator locator;
+
+   	Ethernet.begin(mac, client_ip);
+	delay(1000);
+
+	locator.address = agent_ip;
+	locator.port = agent_port;
+
+	rmw_uros_set_custom_transport(
+		false,
+		&locator,
+		platformio_transport_open,
+		platformio_transport_close,
+		platformio_transport_write,
+		platformio_transport_read
+	);
+}
+
 
 #endif  // MICRO_ROS_PLATFORMIO

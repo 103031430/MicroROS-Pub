@@ -1,13 +1,8 @@
 #include <Arduino.h>
-
-#include "mros_platformio.h"
-
 #include <EthernetUdp.h>
-
+#include <MicroROS_Transport.h>
 #include <uxr/client/util/time.h>
 #include <uxr/client/profile/transport/custom/custom_transport.h>
-
-void* transport_args;
 
 extern "C" {
 
