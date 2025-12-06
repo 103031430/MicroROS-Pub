@@ -1,6 +1,6 @@
 
-#ifndef MICRO_ROS_CUSTOM_TRANSPORT
-#define MICRO_ROS_CUSTOM_TRANSPORT
+#ifndef SRT_MICRO_ROS_TRANSPORT
+#define SRT_MICRO_ROS_TRANSPORT
 
 #include <Ethernet.h>
 #include <uxr/client/transport.h>
@@ -59,4 +59,4 @@ static inline void set_microros_eth_transports(byte mac[], IPAddress client_ip, 
 }
 
 
-#endif  // MICRO_ROS_PLATFORMIO
+#endif  // SRT_MICRO_ROS_TRANSPORT
