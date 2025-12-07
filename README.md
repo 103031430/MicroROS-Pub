@@ -16,6 +16,7 @@ The board used for this project is [Waveshare ESP32-S3-ETH](https://www.waveshar
 ## Libraries Used
 The following Libraries is used for this project:
 - [Ethernet](https://docs.arduino.cc/libraries/ethernet/#Ethernet%20Class)
+- [Micro ROS for PlatformIO](https://github.com/micro-ROS/micro_ros_platformio)
 
 ## Docker Setup
 The docker command used for this for this project
@@ -65,6 +66,7 @@ Once the micro ROS is running, press the reset button on the ESP32-S3-ETH and th
 The following links will provide further details each function used in the code:
 - [Ethernet.h and EthernetUdp.h](https://docs.arduino.cc/libraries/ethernet/#Ethernet%20Class)
 - [SPI.begin() function](https://docs.arduino.cc/language-reference/en/functions/communication/SPI/begin/)
+- [Custom Transport for eProsima Micro XRCE-DDS](https://micro-xrce-dds.docs.eprosima.com/en/latest/transport.html#custom-transport)
 
 Other links:
 - [ESP32-S3-ETH](https://www.waveshare.com/esp32-s3-eth.htm)
