@@ -38,7 +38,7 @@ void CreatePublisher();
 // Network Configuration
 byte esp_mac[] = { 0xDE, 0xAD, 0xAF, 0x91, 0x3E, 0xD7 };    // Mac address of ESP32
 IPAddress esp_ip(192, 168, 0, 108);                         // IP address of ESP32
-IPAddress agent_ip(192, 168, 1, 30);                        // IP address of Micro ROS agent        
+IPAddress agent_ip(192, 168, 0, 30);                        // IP address of Micro ROS agent        
 size_t agent_port = 8888;                                   // Micro ROS Agent Port Number
 
 
