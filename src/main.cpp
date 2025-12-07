@@ -1,7 +1,4 @@
 #include <Arduino.h>
-#include <Ethernet.h>
-#include <EthernetUdp.h>
-#include <Udp.h>
 #include <SPI.h>
 #include <MicroROS_Transport.h>
 #include <rcl/rcl.h>
@@ -19,7 +16,7 @@
 #define W5500_SCK   13    // Serial Clock PIN
 
 
-// Define variables
+// Define ROS entities
 rcl_publisher_t publisher;
 std_msgs__msg__Int32 msg;
 rclc_executor_t executor;
@@ -29,7 +26,6 @@ rcl_node_t node;
 rcl_timer_t timer;
 EthernetUDP udp;
 
-
 // Define Functions
 void error_loop();                                                                          
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time);
@@ -38,15 +34,17 @@ void PublishMsg();
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}              // 
 
 
-// Static IP Configuration for the ESP32-S3-ETH
+// Network Configuration
 byte esp_mac[] = { 0xDE, 0xAD, 0xAF, 0x91, 0x3E, 0xD7 };    // Mac address of ESP32
 IPAddress esp_ip(192, 168, 1, 200);                         // IP address of ESP32
-
-
-// IP and Port Number Configuration for the Micro ROS Agent
 IPAddress agent_ip(192, 168, 1, 10);                        // IP address of Micro ROS agent        
 size_t agent_port = 8888;                                   // Micro ROS Agent Port Number
 
+
+// ROS Node Configurations
+const char* NodeName = "micro_ros_esp_node";
+const char* PublisherTopic = "micro_ros_esp_publisher";
+const int ExecutorTimeout = 100;  // ms
 
 
 void setup() {
@@ -76,7 +74,7 @@ void setup() {
 
 void loop() {
   delay(100);
-  RCSOFTCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100)));
+  RCSOFTCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(ExecutorTimeout)));
 }
 
 
@@ -99,6 +97,7 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
 }
 
 
+// Initialising the ROS Node and and sending messages out from a Publisher
 void PublishMsg() {
 
   // Initialize micro-ROS allocator
@@ -110,7 +109,7 @@ void PublishMsg() {
 
 
   // Create node
-  RCCHECK(rclc_node_init_default(&node, "micro_ros_platformio_node", "", &support));
+  RCCHECK(rclc_node_init_default(&node, NodeName, "", &support));
 
 
   // create publisher
@@ -118,7 +117,7 @@ void PublishMsg() {
     &publisher,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
-    "micro_ros_platformio_node_publisher")
+    PublisherTopic)
   );
 
 
@@ -135,8 +134,5 @@ void PublishMsg() {
   // create executor
   RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
   RCCHECK(rclc_executor_add_timer(&executor, &timer));
-
-
-  msg.data = 0;
 
 }
