@@ -29,7 +29,8 @@ EthernetUDP udp;
 // Define Functions
 void error_loop();                                                                          
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time);
-void PublishMsg();
+void CreatePublisher();
+
 #define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){error_loop();}}     // Checks for Errors in Micro ROS Setup
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){}}              // 
 
@@ -45,6 +46,7 @@ size_t agent_port = 8888;                                   // Micro ROS Agent P
 const char* NodeName = "micro_ros_esp_node";
 const char* PublisherTopic = "micro_ros_esp_publisher";
 const int ExecutorTimeout = 100;  // ms
+const unsigned int timerTimeout = 1000;
 
 
 void setup() {
@@ -66,14 +68,14 @@ void setup() {
   delay(2000);
 
   // Begin Publishing Message "data: <value>"
-  PublishMsg();
+  CreatePublisher();
 
 }
 
 
-
 void loop() {
   delay(100);
+  // Run the executor
   RCSOFTCHECK(rclc_executor_spin_some(&executor, RCL_MS_TO_NS(ExecutorTimeout)));
 }
 
@@ -86,8 +88,7 @@ void error_loop() {
   }
 }
 
-
-
+// Define Timer Callback function (When the timer runs out...)
 void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
   RCLC_UNUSED(last_call_time);
   if (timer != NULL) {
@@ -97,23 +98,22 @@ void timer_callback(rcl_timer_t * timer, int64_t last_call_time) {
 }
 
 
-// Initialising the ROS Node and and sending messages out from a Publisher
-void PublishMsg() {
+// Initialising the ROS Node and and sending data out from a Publisher
+void CreatePublisher() {
 
   // Initialize micro-ROS allocator
   allocator = rcl_get_default_allocator();
-
 
   //create init_options
   RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
 
 
-  // Create node
+  // Create a node
   RCCHECK(rclc_node_init_default(&node, NodeName, "", &support));
 
 
-  // create publisher
-  RCCHECK(rclc_publisher_init_default(
+  // create publisher (Quality of Service Configuration: Best Effort)
+  RCCHECK(rclc_publisher_init_best_effort(
     &publisher,
     &node,
     ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int32),
@@ -121,18 +121,18 @@ void PublishMsg() {
   );
 
 
-  // create timer,
-  const unsigned int timer_timeout = 1000;
+  // Create a Timer for Publisher (use it to handle periodic publications or events)
   RCCHECK(rclc_timer_init_default(
     &timer,
     &support,
-    RCL_MS_TO_NS(timer_timeout),
+    RCL_MS_TO_NS(timerTimeout),
     timer_callback)
   );
 
-
-  // create executor
+  // Initialise Executor
   RCCHECK(rclc_executor_init(&executor, &support.context, 1, &allocator));
+
+  // Add Timer to Executor
   RCCHECK(rclc_executor_add_timer(&executor, &timer));
 
 }
