@@ -42,7 +42,7 @@ static inline void set_microros_eth_transports(byte mac[], IPAddress client_ip, 
 
 	static struct micro_ros_agent_locator locator;
 
-   	Ethernet.begin(mac, client_ip);
+   	Ethernet.begin(mac, client_ip, dns, gateway);
 	delay(1000);
 
 	locator.address = agent_ip;
